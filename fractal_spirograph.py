@@ -50,12 +50,6 @@ def init():
     circle = base
     for x in range(100):
         circle = circle.add_child()
-#    ax.add_artist(plt.Circle([base.x, base.y], base.r, edgecolor = "k", facecolor = "none"))
-#    circles = []
-#    circle = base
-#    for i in range(10):
-#        circle = circle.add_child()
-#        circles.append(circle)
     line.set_data(xdata, ydata)
     return line,
 
@@ -76,18 +70,9 @@ def animate(i):
             circle = circle.child
         else:
             break
-        
-#        ax.add_artist(plt.Circle([circle.x, circle.y], circle.r))
-        
     xdata = np.append(xdata, circle.x)
     ydata = np.append(ydata, circle.y)  
     line, = ax.plot(xdata, ydata, c = "r", lw = 0.5)
-#    base_artist = plt.Circle([base.x, base.y], base.r, edgecolor="k", facecolor="None")
-#    ax.add_artist(base_artist)
-#    for s in circles:
-#        c = plt.Circle([s.x, s.y], s.r, edgecolor = "k", facecolor = "None")
-#        ax.add_artist(c)
-#        s.update()
 
     fig.canvas.draw()
     return line,
@@ -98,6 +83,6 @@ if __name__ == "__main__":
     fig, ax = plt.subplots(figsize = (5,5))
     line, = ax.plot(xdata, ydata, c = "r", lw = 1)
     ani = animation.FuncAnimation(fig, animate, init_func=init, interval = 1, frames = 500, repeat = False, blit = True)
-#    plt.show()
-    ani.save("spiro.mp4", fps = 30)
+    plt.show()
+#    ani.save("spiro.gif", imagewriter = "imagemagick", fps = 30)
 #    plt.close()
