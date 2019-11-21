@@ -6,3 +6,4 @@ This code is inspired by [this video](https://www.youtube.com/watch?v=0dwJ-bkJwD
 Here I recreate this fun fractal spirograph in python using numpy and matplotlib.
 
 ![fractal_spirograph.gif](spiro.gif)
+![fractal_spirograph_2.gif](spiro_detail.gif)
