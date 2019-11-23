@@ -20,7 +20,7 @@ class Circle:
         self.n = n
         self.resolution = np.float(resolution)
         self.k = k
-        self.v = np.radians(self.k ** (self.n - 1)) / self.resolution
+        self.v = np.radians(self.k ** (self.n - 5)) / self.resolution
         self.angle = np.pi / 2
         self.parent = parent
         self.child = None
@@ -44,6 +44,60 @@ class Circle:
         ax.add_artist(plt.Circle([self.x, self.y], self.r, edgecolor = "gray", facecolor = "none", lw = 0.5 ))
         
 
+
+class Spirograph:
+    def __init__(self, n_circles = 10, k = -4, resolution = 1, division_rate = 3.0, start_radius = 10):
+        self.n_circles = n_circles
+        self.k = k
+        self.resolution = resolution
+        self.division_rate = division_rate
+        self.start_radius = start_radius
+        
+        self.base = Circle(r=self.start_radius, ratio = self.division_rate, 
+                           resolution = self.resolution, k = self.k)
+        next_circle = self.base
+        for _ in range(self.n_circles):
+            next_circle = next_circle.add_child()
+        
+        self.x_data = np.array([])
+        self.y_data = np.array([])
+        
+    def make_animation(self):
+        fig, ax = plt.subplots()
+        line, = ax.plot([],[], c = "r", lw = 0.5)
+        
+        def initialize_plot():
+            line.set_data(self.x_data, self.y_data)
+            return line,
+        
+        def animate(i):
+            ax.clear()
+            ax.axis("equal")
+            ax.set_xlim(-self.base.r - 20,self.base.r +20)
+            ax.set_ylim(-self.base.r - 20,self.base.r +20)
+            ax.set_title(str(i))
+            
+            for step in range(self.resolution):
+                circle = self.base
+                while circle.child != None:
+                    circle.update()
+                    if step == self.resolution-1:
+                        circle.show(ax)
+                    circle = circle.child
+                self.x_data = np.append(self.x_data, circle.x)
+                self.y_data = np.append(self.y_data, circle.y)
+            
+            line, = ax.plot(self.x_data, self.y_data, c = "r", lw=0.5)
+            fig.canvas.draw()
+            return line,
+        
+        anim = animation.FuncAnimation(fig, animate, init_func=initialize_plot, blit = True)
+        return anim
+        
+        
+        
+        
+        
 def init():
     global circles
     global xdata, ydata
@@ -89,7 +143,7 @@ global n_circles
 global division_rate
 global k
 if __name__ == "__main__":
-    resolution = 1
+    resolution = 100
     n_circles = 10
     division_rate = 3.0
     k = 4
@@ -98,7 +152,7 @@ if __name__ == "__main__":
     ydata = np.array([])
     fig, ax = plt.subplots(figsize = (5,5))
     line, = ax.plot(xdata, ydata, c = "r", lw = 1)
-    ani = animation.FuncAnimation(fig, animate, init_func=init, interval = 1, repeat = True, blit = True)
-    plt.show()
-#    ani.save("spiro_detail.gif", writer = "imagemagick", fps = 30)
+#    ani = animation.FuncAnimation(fig, animate, init_func=init, interval = 1, frames = 920, repeat = True, blit = True)
+#    plt.show()
+#    ani.save("spiro_detail.mp4", writer = "ffmpeg", fps = 30)
 #    plt.close()
