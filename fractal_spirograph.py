@@ -20,7 +20,7 @@ class Circle:
         self.n = n
         self.resolution = np.float(resolution)
         self.k = k
-        self.v = np.radians(self.k ** (self.n - 5)) / self.resolution
+        self.v = np.radians(self.k ** (self.n -1)) / self.resolution
         self.angle = np.pi / 2
         self.parent = parent
         self.child = None
@@ -30,7 +30,7 @@ class Circle:
         new_r = self.r / self.ratio
         new_x = self.x + self.r + new_r
         new_y = self.y
-        self.child = Circle(x=new_x, y=new_y, r=new_r, n= self.n+1,  parent = self)
+        self.child = Circle(x=new_x, y=new_y, r=new_r, n= self.n+1, ratio = self.ratio, parent = self)
         return self.child
     def update(self):     
         if self.parent:
@@ -46,12 +46,17 @@ class Circle:
 
 
 class Spirograph:
-    def __init__(self, n_circles = 10, k = -4, resolution = 1, division_rate = 3.0, start_radius = 10):
+    def __init__(self, n_circles = 10, k = -4, resolution = 100, division_rate = 3.0, 
+                 start_radius = 10, frames = 1000, interval = 10, linewidth = 0.1, alpha = 0.5):
         self.n_circles = n_circles
         self.k = k
         self.resolution = resolution
         self.division_rate = division_rate
         self.start_radius = start_radius
+        self.frames = frames
+        self.interval = interval
+        self.linewidth = linewidth
+        self.alpha = alpha
         
         self.base = Circle(r=self.start_radius, ratio = self.division_rate, 
                            resolution = self.resolution, k = self.k)
@@ -63,8 +68,8 @@ class Spirograph:
         self.y_data = np.array([])
         
     def make_animation(self):
-        fig, ax = plt.subplots()
-        line, = ax.plot([],[], c = "r", lw = 0.5)
+        fig, ax = plt.subplots(figsize = (6,6))
+        line, = ax.plot([],[], c = "r", lw = self.linewidth, alpha = self.alpha)
         
         def initialize_plot():
             line.set_data(self.x_data, self.y_data)
@@ -73,86 +78,42 @@ class Spirograph:
         def animate(i):
             ax.clear()
             ax.axis("equal")
-            ax.set_xlim(-self.base.r - 20,self.base.r +20)
-            ax.set_ylim(-self.base.r - 20,self.base.r +20)
+            ax.set_xlim(-self.base.r - 50,self.base.r +50)
+            ax.set_ylim(-self.base.r - 50,self.base.r +50)
             ax.set_title(str(i))
             
             for step in range(self.resolution):
                 circle = self.base
-                while circle.child != None:
+                while True:
                     circle.update()
                     if step == self.resolution-1:
                         circle.show(ax)
-                    circle = circle.child
+                    if circle.child != None:
+                        circle = circle.child
+                    else:
+                        break
                 self.x_data = np.append(self.x_data, circle.x)
                 self.y_data = np.append(self.y_data, circle.y)
             
-            line, = ax.plot(self.x_data, self.y_data, c = "r", lw=0.5)
+            line, = ax.plot(self.x_data, self.y_data, c = "r", lw = self.linewidth, alpha = self.alpha)
             fig.canvas.draw()
             return line,
         
-        anim = animation.FuncAnimation(fig, animate, init_func=initialize_plot, blit = True)
+        anim = animation.FuncAnimation(fig, animate, init_func=initialize_plot, 
+                                       blit = True, interval = self.interval, frames = self.frames)
         return anim
-        
-        
-        
-        
-        
-def init():
-    global circles
-    global xdata, ydata
-    global base
-    global k
-    base = Circle(resolution=resolution, n=0, ratio= division_rate, k = k)
-    circle = base
-    for x in range(n_circles):
-        circle = circle.add_child()
-    line.set_data(xdata, ydata)
-    return line,
-
-def animate(i):
-    global xdata
-    global ydata
-    global base  
-    ax.clear()
-    ax.axis("equal")
-    ax.set_xlim(-base.r - 20,base.r +20)
-    ax.set_ylim(-base.r - 20,base.r +20)
-    ax.set_title(str(i)) 
     
-    for step in range(resolution):
-        circle = base
-        while True:
-            circle.update()
-            if step == resolution-1:
-               circle.show(ax)
-            if circle.child != None:
-                circle = circle.child
-            else:
-                break
-        xdata = np.append(xdata, circle.x)
-        ydata = np.append(ydata, circle.y)
+    def show_animation(self):
+        anim = self.make_animation()
+        plt.show()
+    
+    def save_animation(self):
+        anim = self.make_animation()
+        anim.save("./animated_fractal.gif", writer = "imagamagick")
+        
+        
+        
 
-
-    line, = ax.plot(xdata, ydata, c = "r", lw = 0.1)
-    fig.canvas.draw()
-    return line,
-
-global resolution
-global n_circles
-global division_rate
-global k
 if __name__ == "__main__":
-    resolution = 100
-    n_circles = 10
-    division_rate = 3.0
-    k = 4
-    
-    xdata = np.array([])
-    ydata = np.array([])
-    fig, ax = plt.subplots(figsize = (5,5))
-    line, = ax.plot(xdata, ydata, c = "r", lw = 1)
-#    ani = animation.FuncAnimation(fig, animate, init_func=init, interval = 1, frames = 920, repeat = True, blit = True)
-#    plt.show()
-#    ani.save("spiro_detail.mp4", writer = "ffmpeg", fps = 30)
-#    plt.close()
+    s = Spirograph(resolution=5, linewidth =0.5, alpha = 1)
+    s.show_animation()
